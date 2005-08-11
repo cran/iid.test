@@ -1,0 +1,5 @@
+daily.station.records  - applies iid.test to daily station data
+iid.test               - test for iid
+n.records              - number of record-events in a series
+obs                    - sample series
+test.iid.test          - test routine for iid.test
