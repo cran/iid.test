@@ -25,13 +25,17 @@ n.records <- function(y) {
   invisible(records)
 } 
 
-iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200) {
+iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.reverse=TRUE) {
   Y <- as.matrix(Y)
   Y[!is.finite(Y)] <- NA
   t.r <- dim(Y)
   events <- matrix(rep(FALSE,t.r[1]*t.r[2]),t.r[1],t.r[2])
   events.rev <- events
   N.records <- rep(NA,t.r[2])
+# Use binomial distribution to look for suspicious clusters (dependencies)
+  CI.95 <- rep(NA,t.r[1]*2); dim(CI.95) <- c(t.r[1],2); CI.95.rev <- CI.95 
+  p.val <- rep(NA,t.r[1]); i.cluster <- rep(FALSE,t.r[1])
+  p.val.rev <- p.val; i.cluster.rev <- i.cluster
 
   if (plot) {
     par(col.axis="white")
@@ -39,7 +43,7 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200) {
          xlab="time",ylab="location")
     par(col.axis="black")
     axis(1)
-    lines(c(1,t.r[1]),rep(t.r[2],2),lwd=3)
+    lines(c(-5,t.r[1]+6),rep(t.r[2],2)+0.5,lwd=3)
     par.0 <- par(); par(srt=90)
     text(0,round(t.r[2]/2),"Forward",cex=1,vfont=c("sans serif","italic"))
     text(0,round(3*t.r[2]/2),"Backward",cex=1,vfont=c("sans serif","italic"))
@@ -51,22 +55,43 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200) {
     N.records[ir] <- record.stats$N
     events[,ir] <- as.numeric(record.stats$events)
     events.rev[,ir] <- as.numeric(record.stats$events.rev)
-    if (plot) {
-      lines(c(1,t.r[1]),rep(ir,2),col="grey70")
-      points(record.stats$t+0.1,rep(ir,record.stats$N)+0.1,pch=20,cex=1.50,col="grey30")
-      points(record.stats$t+0.1,rep(ir,record.stats$N)+0.2,pch=20,cex=0.70,col="grey50")
-      points(record.stats$t+0.1,rep(ir,record.stats$N)+0.3,pch=20,cex=0.50,col="grey70")
-      points(record.stats$t+0.1,rep(ir,record.stats$N)+0.4,pch=20,cex=0.30,col="white")
 
+    if (plot) {
+
+      # Timing index for record.
+      t1 <- record.stats$t
+      if (reverse.plot.reverse) t2 <- record.stats$t.rev else 
+                                t2 <- t.r[1] - record.stats$t.rev + 1
+
+      lines(c(1,t.r[1]),rep(ir,2),col="grey70")            
+      points(t1,rep(ir,record.stats$N)+0.025,pch=20,cex=1.50,col="grey30")
+      points(t1+0.05,rep(ir,record.stats$N)+0.050,pch=20,cex=0.70,col="grey50")
+      points(t1+0.07,rep(ir,record.stats$N)+0.075,pch=20,cex=0.50,col="grey70")
+      points(t1+0.1,rep(ir,record.stats$N)+0.100,pch=20,cex=0.30,col="white")   
+   
       lines(c(1,t.r[1]),rep(ir+t.r[2],2),col="grey70")
-      points(record.stats$t.rev+0.1,rep(ir,record.stats$N.rev)+0.1+t.r[2],
-      pch=20,cex=1.50,col="grey30")
-      points(record.stats$t.rev+0.1,rep(ir,record.stats$N.rev)+0.2+t.r[2],
-      pch=20,cex=0.70,col="grey50")
-      points(record.stats$t.rev+0.1,rep(ir,record.stats$N.rev)+0.3+t.r[2],
-      pch=20,cex=0.50,col="grey70")
-      points(record.stats$t.rev+0.1,rep(ir,record.stats$N.rev)+0.4+t.r[2],
-      pch=20,cex=0.30,col="white")
+      points(t2,rep(ir,record.stats$N.rev)+0.025+t.r[2],pch=20,cex=1.50,col="grey30")
+      points(t2+0.05,rep(ir,record.stats$N.rev)+0.050+t.r[2],pch=20,cex=0.70,col="grey50")
+      points(t2+0.07,rep(ir,record.stats$N.rev)+0.075+t.r[2],pch=20,cex=0.50,col="grey70")
+      points(t2+0.1,rep(ir,record.stats$N.rev)+0.100+t.r[2],pch=20,cex=0.30,col="white")
+    }
+  }
+
+  if (plot) {
+    for (it in 2:t.r[1]) {
+      CI.95[it,] <- qbinom(p=c(0.025,0.975),size=t.r[2],prob=1/it)
+      p.val[it] <- pbinom(events[it,],size=t.r[2],prob=1/it)
+      if ( (events[it,] < CI.95[it,1]) | (events[it,] > CI.95[it,2]) ) {
+        i.cluster[it] <- TRUE
+        lines(rep(it,2),c(0,t.r[2]),lwd=2,lty=2,col="pink")
+      }
+      CI.95.rev[it,] <- qbinom(p=c(0.025,0.975),size=t.r[2],prob=1/it)
+      p.val.rev[it] <- pbinom(events[it,],size=t.r[2],prob=1/it)
+      if ( (events.rev[it,] < CI.95.rev[it,1]) | (events.rev[it,] > CI.95.rev[it,2]) ) {
+        i.cluster.rev[it] <- TRUE
+        if (reverse.plot.reverse) lines(rep(t.r[1]-it+1,2),c(t.r[2]+1,2*t.r[2]),lwd=2,lty=2,col="pink") else
+                                  lines(rep(it,2),c(t.r[2]+1,2*t.r[2]),lwd=2,lty=2,col="pink") 
+      }    
     }
   }
 
@@ -118,7 +143,9 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200) {
   }
 
   results <- list(record.density=record.density,
-                  record.density.rev=record.density.rev)
+                  record.density.rev=record.density.rev,
+                  CI.95=CI.95,p.val=p.val,i.cluster=i.cluster,
+                  CI.95.rev=CI.95.rev,p.val.rev=p.val.rev,i.cluster.rev=i.cluster.rev)
   invisible(results)
 }
 
@@ -129,7 +156,7 @@ test.iid.test <- function(distr="rnorm",d=c(100,30),plot=TRUE,Monte.Carlo=TRUE) 
   invisible(test.results)
 }
 
-daily.station.records <- function(obs,element="precip",subsample=5,tolerance=2) {
+daily.station.records <- function(obs,element="precip",subsample=5,tolerance=2,remove.zeroes=FALSE,reverse.plot.reverse=FALSE) {
 
   if (class(obs)[2] != "daily.station.record") 
      stop("Need a 'daily.station.record' object!")
@@ -158,12 +185,12 @@ daily.station.records <- function(obs,element="precip",subsample=5,tolerance=2) 
   for (i in 1:length(ykeep)) {
     if (mod(i,subsample) != 1) ykeep[i] <- FALSE
     if (sum(!is.finite(dat[,i])) > tolerance) ykeep[i] <- FALSE
+    if ( (remove.zeroes) & (sum(dat[,i]==0) > tolerance) ) ykeep[i] <- FALSE
   }
   dat <- dat[,ykeep] # extra days during leap year will bias the results 
 
   #image(log(dat)); x11()
 
-
   newFig()
-  iid.test(dat)
+  iid.test(dat,reverse.plot.reverse=reverse.plot.reverse)
 }
