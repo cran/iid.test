@@ -3,6 +3,14 @@ library(clim.pact)
 n.records <- function(y) {
   m <- length(y)
   y[!is.finite(y)] <- min(y,na.rm=TRUE)
+  if (length(rownames(table(y))) < 0.99 * length(y)) {
+    print("---Warning---Warning---Warning---Warning---Warning---Warning---")
+    print("r.records (iid.test): Warning, the time series contains many similar values!")
+    print("The test does not work for cases where ties are common")
+    print("See Benestad (2004) 'Recor-values, non-stationarity tests and extreme value distributions' Global and Planetary Change, 44, 11-26")
+    print("http://www.sciencedirect.com/science?_ob=ArticleURL&_udi=B6VF0-4D6373Y-2&_coverDate=12%2F01%2F2004&_alid=228212815&_rdoc=1&_fmt=&_orig=search&_qd=1&_cdi=5996&_sort=d&view=c&_acct=C000056508&_version=1&_urlVersion=0&_userid=2181464&md5=632559476e84eb8c48287cf8038690d2")
+  }
+  y.rev <- reverse(y)
   N <- 1; N.rev <- N
   t <- rep(1,m); t.rev <- rep(m,m)
   events <- rep(FALSE,m); events.rev <- events
@@ -13,7 +21,13 @@ n.records <- function(y) {
       t[N] <- i
       events[i] <- TRUE
     }
-    if (y[m-i+1] > max(y[(m-i+2):m],na.rm=TRUE)) {
+#    if (y[m-i+1] > max(y[(m-i+2):m],na.rm=TRUE)) {
+#      N.rev <- N.rev + 1
+#      t.rev[N.rev] <- length(y)-i
+#      events.rev[length(y)-i] <- TRUE
+#    }
+# Changed 18.08.2006: REB - a more readable code... shouldn't make any difference.
+    if (y.rev[i] > max(y.rev[1:(i-1)],na.rm=TRUE)) {
       N.rev <- N.rev + 1
       t.rev[N.rev] <- length(y)-i
       events.rev[length(y)-i] <- TRUE
