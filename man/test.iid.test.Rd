@@ -14,7 +14,7 @@ The papers are available in the pdf format from \url{http://regclim.met.no/resul
 
 }
 \usage{
-test.iid.test(distr="rnorm",d=c(100,30),plot=TRUE,Monte.Carlo=TRUE)
+test.iid.test(distr="rnorm",d=c(70, 50),plot=TRUE,Monte.Carlo=TRUE)
 }
 \arguments{
     \item{distr}{What type of random numbers to be used, .eg normally distributed..}

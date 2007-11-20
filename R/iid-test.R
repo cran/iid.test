@@ -29,8 +29,8 @@ n.records <- function(y) {
 # Changed 18.08.2006: REB - a more readable code... shouldn't make any difference.
     if (y.rev[i] > max(y.rev[1:(i-1)],na.rm=TRUE)) {
       N.rev <- N.rev + 1
-      t.rev[N.rev] <- length(y)-i
-      events.rev[length(y)-i] <- TRUE
+      t.rev[N.rev] <- length(y)-i+1
+      events.rev[length(y)-i+1] <- TRUE
     }
   }
   t <- t[1:N]; t.rev <- t.rev[1:N.rev]
@@ -47,7 +47,7 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
   events.rev <- events
   N.records <- rep(NA,t.r[2])
 # Use binomial distribution to look for suspicious clusters (dependencies)
-  CI.95 <- rep(NA,t.r[1]*2); dim(CI.95) <- c(t.r[1],2); CI.95.rev <- CI.95 
+  CI.95 <- rep(t.r[2],t.r[1]*2); dim(CI.95) <- c(t.r[1],2); CI.95.rev <- CI.95 
   p.val <- rep(NA,t.r[1]); i.cluster <- rep(FALSE,t.r[1])
   p.val.rev <- p.val; i.cluster.rev <- i.cluster
 
@@ -55,8 +55,7 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
     par(col.axis="white")
     plot(c(1,t.r[1]),c(1,2*t.r[2]),type="n",main="iid-test",
          xlab="time",ylab="location")
-    par(col.axis="black")
-    axis(1)
+    par(col.axis="black"); axis(1)
     lines(c(-5,t.r[1]+6),rep(t.r[2],2)+0.5,lwd=3)
     par.0 <- par(); par(srt=90)
     text(0,round(t.r[2]/2),"Forward",cex=1,vfont=c("sans serif","italic"))
@@ -74,7 +73,7 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
 
       # Timing index for record.
       t1 <- record.stats$t
-      if (reverse.plot.reverse) t2 <- record.stats$t.rev else 
+      if (reverse.plot.reverse) t2 <- record.stats$t.rev  else 
                                 t2 <- t.r[1] - record.stats$t.rev + 1
 
       lines(c(1,t.r[1]),rep(ir,2),col="grey70")            
@@ -95,13 +94,13 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
     for (it in 2:t.r[1]) {
       CI.95[it,] <- qbinom(p=c(0.025,0.975),size=t.r[2],prob=1/it)
       p.val[it] <- pbinom(events[it,],size=t.r[2],prob=1/it)
-      if ( (events[it,] < CI.95[it,1]) | (events[it,] > CI.95[it,2]) ) {
+      if ( (sum(events[it,]) < CI.95[it,1]) | (sum(events[it,]) > CI.95[it,2]) ) {
         i.cluster[it] <- TRUE
         lines(rep(it,2),c(0,t.r[2]),lwd=2,lty=2,col="pink")
       }
       CI.95.rev[it,] <- qbinom(p=c(0.025,0.975),size=t.r[2],prob=1/it)
       p.val.rev[it] <- pbinom(events[it,],size=t.r[2],prob=1/it)
-      if ( (events.rev[it,] < CI.95.rev[it,1]) | (events.rev[it,] > CI.95.rev[it,2]) ) {
+      if ( (sum(events.rev[t.r[1]-it+1,]) < CI.95.rev[it,1]) | (sum(events.rev[t.r[1]-it+1,]) > CI.95.rev[it,2]) ) {
         i.cluster.rev[it] <- TRUE
         if (reverse.plot.reverse) lines(rep(t.r[1]-it+1,2),c(t.r[2]+1,2*t.r[2]),lwd=2,lty=2,col="pink") else
                                   lines(rep(it,2),c(t.r[2]+1,2*t.r[2]),lwd=2,lty=2,col="pink") 
@@ -115,6 +114,7 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
   record.density.rev <- reverse(rowMeans(events.rev,na.rm=TRUE))
   N <- length(record.density)
 
+  q025=rep(NA,N); q975=q025    
   if (Monte.Carlo) {
     print(paste("Please be patient -",N.test,"Monte Carlo runs in progress..."))
     record.mc <- rep(NA,2*N.test*N); dim(record.mc) <- c(N,N.test,2)
@@ -124,17 +124,21 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
       record.mc[,ii,2] <- cumsum(mc.stats$record.density.rev)
     } 
 
-    q025=rep(NA,N); q975=q025    
     for (i in 1:N) {
       q025[i] <- quantile(record.mc[i,,],0.025)
       q975[i] <- quantile(record.mc[i,,],0.955)
     }
     sub <- paste("Shaded region= 95% conf.int. from Monte-Carlo with N=",N.test)
-  } else sub <- ""
+  } else {
+#    for (i in 1:N) {
+#      q025[i] <- sum(CI.95[1:i,1])/t.r[2]
+#      q975[i] <- sum(CI.95[1:i,2])/t.r[2]
+#    }     
+    sub <- ""
+  }
 
   if (plot) {
-    newFig()
-    par(col.axis="white")
+    newFig(); par(col.axis="white")
     Time <- 1:N
     plot(Time,exp( cumsum( 1/(1:N)) ),type="l",lwd=3,col="grey60",
            xlab="Time",main="Observed & Expected number of record-events",
@@ -154,8 +158,24 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
     grid()
     points(Time,exp(cumsum(record.density)),pch=20,cex=0.9)
     points(Time,exp(cumsum(record.density.rev)),pch=21,cex=0.9)
-  }
 
+    
+    newFig()
+    plot(Time,1/(1:N),type="n",xlab="Time",main="Observed & Expected record-occurence",
+           sub=sub)
+    for (i in 1:N) {
+      lines(rep(Time[i],2)-0.2,c(CI.95[i,1]/t.r[2],CI.95[i,2]/t.r[2]),lwd=2,col="grey40")
+      lines(Time[i]+c(-0.2,0.2),rep(CI.95[i,1]/t.r[2],2),lwd=1,col="grey40")
+      lines(Time[i]+c(-0.2,0.2),rep(CI.95[i,2]/t.r[2],2),lwd=1,col="grey40")
+      lines(rep(Time[i],2)+0.2,c(CI.95.rev[i,1]/t.r[2],CI.95.rev[i,2]/t.r[2]),lwd=2,col="grey70")
+      lines(Time[i]+c(-0.2,0.2),rep(CI.95.rev[i,1]/t.r[2],2),lwd=1,col="grey70")
+      lines(Time[i]+c(-0.2,0.2),rep(CI.95.rev[i,2]/t.r[2],2),lwd=1,col="grey70")
+    }
+    points(Time,record.density,pch=20,cex=0.9,col="grey20")    
+    points(Time,record.density.rev,pch=21,cex=0.9)
+    lines(Time,1/(1:N),lwd=2,col="red")
+  }
+  
   results <- list(record.density=record.density,
                   record.density.rev=record.density.rev,
                   CI.95=CI.95,p.val=p.val,i.cluster=i.cluster,
@@ -163,7 +183,9 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
   invisible(results)
 }
 
-test.iid.test <- function(distr="rnorm",d=c(100,30),plot=TRUE,Monte.Carlo=TRUE) {
+  
+
+test.iid.test <- function(distr="rnorm",d=c(70,50),plot=TRUE,Monte.Carlo=TRUE) {
   rnd <- eval(parse(text=paste(distr,"(",d[1]*d[2],")",sep="")))
   dim(rnd) <- c(d[1],d[2])
   test.results <- iid.test(rnd,plot=plot,Monte.Carlo=Monte.Carlo)
