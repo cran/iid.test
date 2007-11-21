@@ -162,7 +162,8 @@ iid.test <- function(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.revers
     
     newFig()
     plot(Time,1/(1:N),type="n",xlab="Time",main="Observed & Expected record-occurence",
-           sub=sub)
+           sub="95% Confidence interval from binomial distribution",
+           ylab="record-density")
     for (i in 1:N) {
       lines(rep(Time[i],2)-0.2,c(CI.95[i,1]/t.r[2],CI.95[i,2]/t.r[2]),lwd=2,col="grey40")
       lines(Time[i]+c(-0.2,0.2),rep(CI.95[i,1]/t.r[2],2),lwd=1,col="grey40")

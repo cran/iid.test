@@ -1,6 +1,6 @@
 Package: iid.test
-Version: 1.2
-Date:  November 20 2007
+Version: 1.3
+Date:  November 21 2007
 Title: iid-test
 Author: Rasmus E. Benestad <rasmus.benestad@met.no>
 Maintainer: Rasmus E. Benestad <rasmus.benestad@met.no>
@@ -9,4 +9,4 @@ Description: Testing whether data is independent and identically distributed
 License: GPL (>= 2)
 URL: http://www.r-project.org http://cran.r-project.org
 ZipData: no 
-Packaged: Tue Nov 20 09:04:53 2007; rasmusb
+Packaged: Wed Nov 21 16:33:27 2007; rasmusb
