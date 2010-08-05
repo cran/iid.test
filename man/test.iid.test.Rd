@@ -20,10 +20,10 @@ test.iid.test(distr="rnorm",d=c(70, 50),plot=TRUE,Monte.Carlo=TRUE)
     \item{distr}{What type of random numbers to be used, .eg normally distributed..}
     \item{d}{Dimension of the test matrix.}
     \item{plot}{For plotting the diagnostics.}
-    \item{Monte.Carlo}{Flag for running Monte-Carlo simulations to estimate 95% C.I.}
+    \item{Monte.Carlo}{Flag for running Monte-Carlo simulations to estimate 95\% C.I.}
 }
 \value{list: 'record.density' and 'record.density.rev' for the reverse analysis.}
-\author{R.E. Benestad}}
+\author{R.E. Benestad}
 \examples{
 test.iid.test()
 }

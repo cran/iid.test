@@ -26,7 +26,7 @@ daily.station.records(obs,element="precip",subsample=5,tolerance=2,remove.zeroes
     \item{reverse.plot.reverse}{see iid.test}
 }
 \value{list: 'record.density' and 'record.density.rev' for the reverse analysis.}
-\author{R.E. Benestad}}
+\author{R.E. Benestad}
 \examples{
 data(obs)
 daily.station.records(obs,subsample=30)

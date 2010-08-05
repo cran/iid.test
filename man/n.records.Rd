@@ -20,7 +20,7 @@ n.records(y)
     \item{y}{A vector.}
 }
 \value{list: N= number of records, t=vector of time index corresponding to when a new record is set, events= a vector with TRUE where there is a record-event. The same fields with a suffix '.rev' represent the same analysis but for a reversed chronological order.} 
-\author{R.E. Benestad}}
+\author{R.E. Benestad}
 \examples{
 y <- rnorm(100)
 n.records(y)

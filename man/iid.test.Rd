@@ -27,7 +27,7 @@ iid.test(Y,plot=TRUE,Monte.Carlo=TRUE,N.test=200,reverse.plot.reverse=TRUE)
     \item{reverse.plot.reverse}{TRUE: plots reverse from right to left, else left to right.}.
 }
 \value{list: 'record.density' and 'record.density.rev' for the reverse analysis. The variables CI.95, p.val, and i.cluster (and their reverse equivalents '.rev') return the estimated 95\% conf. int, p-value, and the location of the clusters (binomial).}
-\author{R.E. Benestad}}
+\author{R.E. Benestad}
 \examples{
 dat <- rnorm(100*30)
 dim(dat) <- c(100,30)
