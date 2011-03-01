@@ -20,6 +20,8 @@
 \alias{turuhansk.t2m}
 \alias{cet}
 \alias{GPC2004}
+\alias{CR2003}
+\alias{JC2006}
 \title{Data sets.}
 \description{
 \code{obs} contains daily temperature and precipitation from Oslo. Stored as a 'daily.station.record' (clim.pact).
@@ -53,7 +55,16 @@ binomially distributed data (\code{rbinom}). The \code{GPC2004} contains:
 	 of record densities for the MC-simulations 1-7. \cr
          [,18] \tab NS   \tab numeric \tab Number of parrallel series \cr
        }
-       
+
+\code{CR2003} is a list of monthly maximum temperatures from the NORDKLIM
+data set - see \code{\link[clim.pact]{getnordklim}} - used to do the
+analysis in Benestad, R.E. (2003) How often can we expect a
+record-event? Climate Research Vol 23, 3-13
+\url{http://www.int-res.com/abstracts/cr/v25/n1/p3-13.html}.
+
+\code{JC2006} contains the data used in Benestad, R.E (2006) Can we
+expect more extreme precipitation on the monthly time scale? J.Clim
+Vol. 19, No. 4, pages 630-637 \url{http://ams.allenpress.com/perlserv/?request=get-abstract&doi=10\%2E1175\%2FJCLI3656\%2E1}
 
 }
 \usage{
@@ -78,6 +89,8 @@ thiruvanantha.t2m
 turuhansk.t2m
 cet
 GPC2004
+CR2003
+JC2006
 }
 
 \format{The data is a 'daily.station.record' object (see \code{\link[clim.pact]{station.obj}}).}
